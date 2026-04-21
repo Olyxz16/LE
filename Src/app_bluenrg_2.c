@@ -529,34 +529,26 @@ static void User_Process(void)
 #endif
     BSP_LED_Toggle(LED2);
 
-    if (connected)
-    {
-      /* Set a random seed */
-      srand(HAL_GetTick());
+    /* Set a random seed */
+    srand(HAL_GetTick());
 
-      /* Update emulated Environmental data */
-      Set_Environmental_Values(&data_t, &data_p,&data_h);
-      Environmental_Update((int32_t)(data_p *100), (int16_t)(data_t * 10),(uint16_t)(data_h*10));
+    /* Update Environmental data */
+    Set_Environmental_Values(&data_t, &data_p,&data_h);
+    Environmental_Update((int32_t)(data_p *100), (int16_t)(data_t * 10),(uint16_t)(data_h*10));
 
-      /* Update emulated Acceleration, Gyroscope and Sensor Fusion data */
-      Set_Random_Motion_Values(counter);
-      Acc_Update(&x_axes, &g_axes, &m_axes);
-      Quat_Update(&q_axes);
+    /* Update Motion data */
+    Set_Random_Motion_Values(counter);
+    Acc_Update(&x_axes, &g_axes, &m_axes);
+    Quat_Update(&q_axes);
 
-      counter ++;
-      if (counter == 40) {
-        counter = 0;
-        Reset_Motion_Values();
-      }
+    counter ++;
+    if (counter == 40) {
+      counter = 0;
+      Reset_Motion_Values();
+    }
 #if !USE_BUTTON
-      HAL_Delay(10000); /* wait 1 sec before sending new data */
+    HAL_Delay(1000); /* wait 1 sec before sending new data */
 #endif
-    }
-    else
-    {
-        Set_Environmental_Values(&data_t, &data_p,&data_h);
-        HAL_Delay(10000);
-    }
 #if USE_BUTTON
     /* Reset the User Button flag */
     user_button_pressed = 0;
@@ -599,9 +591,10 @@ static void Set_Environmental_Values(float *data_t, float *data_p, float *data_h
 				*data_h = 100;
 			  }
 
+/*
 			  snprintf((char *)tx_buffer, sizeof(tx_buffer), "Humidity [%%]:%3.2f\r\n", *data_h);
 			  hts221_tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
-
+*/
 	    }
 
 	    if (status.t_da)
@@ -611,9 +604,11 @@ static void Set_Environmental_Values(float *data_t, float *data_p, float *data_h
 			  hts221_temperature_raw_get(&dev_ctx, &data_raw_temperature);
 			  *data_t = linear_interpolation(&lin_temp,
 													  data_raw_temperature);
+/*
 			  snprintf((char *)tx_buffer, sizeof(tx_buffer), "Temperature [degC]:%6.2f\r\n",
 					  *data_t );
 			  hts221_tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
+*/
 	    }
 
 	      /* Initialize mems driver interface */
@@ -629,8 +624,10 @@ static void Set_Environmental_Values(float *data_t, float *data_p, float *data_h
 	          memset(&data_raw_press, 0x00, sizeof(uint32_t));
 	          lps22hh_pressure_raw_get(&dev_ctx, &data_raw_press);
 	          *data_p = lps22hh_from_lsb_to_hpa( data_raw_press);
+/*
 	          snprintf((char *)tx_buffer, sizeof(tx_buffer), "pressure [hPa]:%6.2f\r\n", *data_p);
 	          lps22hh_tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
+*/
 	    }
 
 }

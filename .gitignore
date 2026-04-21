@@ -1,0 +1,33 @@
+# Qt artifacts
+*.o
+*.obj
+*.moc
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+*.qmake.stash
+Makefile
+Makefile.*
+*.pro.user
+*.pro.user.*
+**/SensorMonitor/SensorMonitor
+
+# STM32CubeIDE / Eclipse artifacts
+**/Debug/
+**/Release/
+*.elf
+*.map
+*.list
+*.hex
+*.bin
+*.d
+.settings/
+*.launch
+
+# OS / Editor temporary files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*~
+#*#

@@ -20,6 +20,7 @@
 #include "bluenrg1_aci.h"
 #include "bluenrg1_hci_le.h"
 #include "bluenrg1_gatt_aci.h"
+#include "main.h"
 
 /* Private macros ------------------------------------------------------------*/
 /** @brief Macro that stores Value into a buffer in Little Endian Format (2 bytes)*/
@@ -64,6 +65,26 @@ extern __IO uint16_t connection_handle;
 extern uint32_t start_time;
 
 /* Private functions ---------------------------------------------------------*/
+/**
+ * @brief  Send binary data over UART for the Serial Monitor
+ * @param  type: 1=Env, 2=Acc, 3=Quat
+ * @param  payload: binary payload
+ * @param  len: length of payload
+ * @retval None
+ */
+static void Serial_SendBinary(uint8_t type, uint8_t *payload, uint8_t len)
+{
+  uint8_t header[4] = {0xA5, 0x5A, type, len};
+  uint8_t checksum = type ^ len;
+  for(uint8_t i=0; i<len; i++) checksum ^= payload[i];
+  
+  // Add a small delay to avoid clashing with ASCII debug prints
+  HAL_Delay(10);
+  
+  HAL_UART_Transmit(&huart2, header, 4, 100);
+  HAL_UART_Transmit(&huart2, payload, len, 100);
+  HAL_UART_Transmit(&huart2, &checksum, 1, 100);
+}
 /**
  * @brief  Add the 'HW' service (and the Environmental and AccGyr characteristics).
  * @param  None
@@ -185,6 +206,9 @@ tBleStatus Acc_Update(AxesRaw_t *x_axes, AxesRaw_t *g_axes, AxesRaw_t *m_axes)
 
   ret = aci_gatt_update_char_value(HWServW2STHandle, AccGyroMagCharHandle,
 				   0, 2+2*3*3, buff);
+  
+  Serial_SendBinary(2, buff, 2+2*3*3);
+
   if (ret != BLE_STATUS_SUCCESS){
     PRINT_DBG("Error while updating Acceleration characteristic: 0x%02X\r\n",ret) ;
     return BLE_STATUS_ERROR ;
@@ -235,6 +259,9 @@ tBleStatus Quat_Update(AxesRaw_t *data)
 
   ret = aci_gatt_update_char_value(SWServW2STHandle, QuaternionsCharHandle,
 				   0, 2+6*SEND_N_QUATERNIONS, buff);
+
+  Serial_SendBinary(3, buff, 2+6*SEND_N_QUATERNIONS);
+
   if (ret != BLE_STATUS_SUCCESS){
     PRINT_DBG("Error while updating Sensor Fusion characteristic: 0x%02X\r\n",ret) ;
     return BLE_STATUS_ERROR ;
@@ -289,6 +316,8 @@ tBleStatus Environmental_Update(int32_t press, int16_t temp,uint16_t hum)
 
   ret = aci_gatt_update_char_value(HWServW2STHandle, EnvironmentalCharHandle,
                                    0, 10, buff);
+
+  Serial_SendBinary(1, buff, 10);
 
   if (ret != BLE_STATUS_SUCCESS){
     PRINT_DBG("Error while updating TEMP characteristic: 0x%04X\r\n",ret) ;
