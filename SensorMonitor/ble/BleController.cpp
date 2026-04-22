@@ -58,15 +58,6 @@ void BleController::onDiscoveryFinished()
     } else {
         qDebug() << "Hardware Service NOT found!";
     }
-
-    // Also try to create SW Service
-    QLowEnergyService *swService = m_controller->createServiceObject(SW_SERVICE_UUID, this);
-    if (swService) {
-        qDebug() << "Software Service created";
-        connect(swService, &QLowEnergyService::stateChanged, this, &BleController::onServiceStateChanged);
-        connect(swService, &QLowEnergyService::characteristicChanged, this, &BleController::onCharacteristicChanged);
-        swService->discoverDetails();
-    }
 }
 
 void BleController::onServiceStateChanged(QLowEnergyService::ServiceState newState)
@@ -80,7 +71,7 @@ void BleController::onServiceStateChanged(QLowEnergyService::ServiceState newSta
         for (const QLowEnergyCharacteristic &c : service->characteristics()) {
             qDebug() << "  - Char:" << c.uuid().toString();
             
-            if (c.uuid() == ENV_CHAR_UUID || c.uuid() == ACC_CHAR_UUID || c.uuid() == QUAT_CHAR_UUID) {
+            if (c.uuid() == ENV_CHAR_UUID) {
                 QLowEnergyDescriptor cccd = c.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration);
                 if (cccd.isValid()) {
                     qDebug() << "    Enabling notifications for" << c.uuid().toString();
@@ -93,14 +84,9 @@ void BleController::onServiceStateChanged(QLowEnergyService::ServiceState newSta
 
 void BleController::onCharacteristicChanged(const QLowEnergyCharacteristic &characteristic, const QByteArray &newValue)
 {
-    // qDebug() << "BLE Char Changed:" << characteristic.uuid().toString() << "Data:" << newValue.toHex(' ');
-
     if (characteristic.uuid() == ENV_CHAR_UUID) {
         EnvironmentalSample sample = SensorPayloadParser::parseEnvironmental(newValue);
         emit environmentalUpdated(sample.tempC, sample.pressHpa, sample.humPct);
-    } else if (characteristic.uuid() == ACC_CHAR_UUID) {
-        MotionSample sample = SensorPayloadParser::parseMotion(newValue);
-        emit accGyroMagUpdated(sample.acc, sample.gyro, sample.mag);
     }
 }
 

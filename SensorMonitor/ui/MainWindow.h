@@ -38,7 +38,6 @@ private slots:
     void onDisconnected();
     void onError(const QString &message);
     void onEnvironmentalUpdated(double tempC, double pressHpa, double humPct);
-    void onAccGyroMagUpdated(const QVector3D &acc, const QVector3D &gyro, const QVector3D &mag);
     void log(const QString &message);
 
 private:

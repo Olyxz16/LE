@@ -32,7 +32,6 @@
 extern uint8_t bdaddr[BDADDR_SIZE];
 extern uint8_t bnrg_expansion_board;
 extern uint16_t EnvironmentalCharHandle;
-extern uint16_t AccGyroMagCharHandle;
 
 __IO uint8_t set_connectable = 1;
 __IO uint16_t connection_handle = 0;
@@ -40,11 +39,6 @@ __IO uint8_t  notification_enabled = FALSE;
 __IO uint32_t connected = FALSE;
 
 volatile uint8_t request_free_fall_notify = FALSE;
-
-AxesRaw_t x_axes = {0, 0, 0};
-AxesRaw_t g_axes = {0, 0, 0};
-AxesRaw_t m_axes = {0, 0, 0};
-AxesRaw_t q_axes[SEND_N_QUATERNIONS] = {{0, 0, 0}};
 
 /* Private function prototypes -----------------------------------------------*/
 void GAP_DisconnectionComplete_CB(void);

@@ -65,11 +65,6 @@ typedef struct {
 
 #define BOOT_TIME	5
 /* Private variables ---------------------------------------------------------*/
-extern AxesRaw_t x_axes;
-extern AxesRaw_t g_axes;
-extern AxesRaw_t m_axes;
-extern AxesRaw_t q_axes;
-
 extern __IO uint16_t connection_handle;
 extern volatile uint8_t set_connectable;
 extern volatile int     connected;
@@ -93,9 +88,7 @@ static lin_t lin_temp;
 static void User_Process(void);
 static void User_Init(void);
 static uint8_t Sensor_DeviceInit(void);
-static void Set_Environmental_Values(float *data_t, float *data_p,float *data_h);
-static void Set_Random_Motion_Values(uint32_t cnt);
-static void Reset_Motion_Values(void);
+void Set_Environmental_Values(float *data_t, float *data_p, float *data_h);
 
 /* USER CODE BEGIN PFP */
 static int32_t hts221_platform_write(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t len);
@@ -479,17 +472,6 @@ uint8_t Sensor_DeviceInit(void)
     while(1);
   }
 
-  ret = Add_SWServW2ST_Service();
-  if(ret == BLE_STATUS_SUCCESS)
-  {
-     PRINT_DBG("BlueNRG2 SW service added successfully.\r\n");
-  }
-  else
-  {
-     PRINT_DBG("Error while adding BlueNRG2 HW service: 0x%02x\r\n", ret);
-     while(1);
-  }
-
   return BLE_STATUS_SUCCESS;
 }
 
@@ -504,7 +486,6 @@ static void User_Process(void)
   float data_t;
   float data_p;
   float data_h;
-  static uint32_t counter = 0;
 
   /* Make the device discoverable */
   if(set_connectable)
@@ -529,23 +510,9 @@ static void User_Process(void)
 #endif
     BSP_LED_Toggle(LED2);
 
-    /* Set a random seed */
-    srand(HAL_GetTick());
-
     /* Update Environmental data */
     Set_Environmental_Values(&data_t, &data_p,&data_h);
     Environmental_Update((int32_t)(data_p *100), (int16_t)(data_t * 10),(uint16_t)(data_h*10));
-
-    /* Update Motion data */
-    Set_Random_Motion_Values(counter);
-    Acc_Update(&x_axes, &g_axes, &m_axes);
-    Quat_Update(&q_axes);
-
-    counter ++;
-    if (counter == 40) {
-      counter = 0;
-      Reset_Motion_Values();
-    }
 #if !USE_BUTTON
     HAL_Delay(1000); /* wait 1 sec before sending new data */
 #endif
@@ -563,7 +530,7 @@ static void User_Process(void)
  * @param  float pointer to pressure data
  * @retval None
  */
-static void Set_Environmental_Values(float *data_t, float *data_p, float *data_h)
+void Set_Environmental_Values(float *data_t, float *data_p, float *data_h)
 {
 		 stmdev_ctx_t dev_ctx;
 		  dev_ctx.write_reg = hts221_platform_write;
@@ -630,69 +597,6 @@ static void Set_Environmental_Values(float *data_t, float *data_p, float *data_h
 */
 	    }
 
-}
-
-/**
- * @brief  Set random values for all motion sensor data
- *
- * @param  uint32_t counter for changing the rotation direction
- * @retval None
- */
-static void Set_Random_Motion_Values(uint32_t cnt)
-{
-  /* Update Acceleration, Gyroscope and Sensor Fusion data */
-  if (cnt < 20) {
-    x_axes.AXIS_X +=  (10  + ((uint64_t)rand()*3*cnt)/RAND_MAX);
-    x_axes.AXIS_Y += -(10  + ((uint64_t)rand()*5*cnt)/RAND_MAX);
-    x_axes.AXIS_Z +=  (10  + ((uint64_t)rand()*7*cnt)/RAND_MAX);
-    g_axes.AXIS_X +=  (100 + ((uint64_t)rand()*2*cnt)/RAND_MAX);
-    g_axes.AXIS_Y += -(100 + ((uint64_t)rand()*4*cnt)/RAND_MAX);
-    g_axes.AXIS_Z +=  (100 + ((uint64_t)rand()*6*cnt)/RAND_MAX);
-    m_axes.AXIS_X +=  (3  + ((uint64_t)rand()*3*cnt)/RAND_MAX);
-    m_axes.AXIS_Y += -(3  + ((uint64_t)rand()*4*cnt)/RAND_MAX);
-    m_axes.AXIS_Z +=  (3  + ((uint64_t)rand()*5*cnt)/RAND_MAX);
-
-    q_axes.AXIS_X -= (100  + ((uint64_t)rand()*3*cnt)/RAND_MAX);
-    q_axes.AXIS_Y += (100  + ((uint64_t)rand()*5*cnt)/RAND_MAX);
-    q_axes.AXIS_Z -= (100  + ((uint64_t)rand()*7*cnt)/RAND_MAX);
-  }
-  else {
-    x_axes.AXIS_X += -(10  + ((uint64_t)rand()*3*cnt)/RAND_MAX);
-    x_axes.AXIS_Y +=  (10  + ((uint64_t)rand()*5*cnt)/RAND_MAX);
-    x_axes.AXIS_Z += -(10  + ((uint64_t)rand()*7*cnt)/RAND_MAX);
-    g_axes.AXIS_X += -(100 + ((uint64_t)rand()*2*cnt)/RAND_MAX);
-    g_axes.AXIS_Y +=  (100 + ((uint64_t)rand()*4*cnt)/RAND_MAX);
-    g_axes.AXIS_Z += -(100 + ((uint64_t)rand()*6*cnt)/RAND_MAX);
-    m_axes.AXIS_X += -(3  + ((uint64_t)rand()*7*cnt)/RAND_MAX);
-    m_axes.AXIS_Y +=  (3  + ((uint64_t)rand()*9*cnt)/RAND_MAX);
-    m_axes.AXIS_Z += -(3  + ((uint64_t)rand()*3*cnt)/RAND_MAX);
-
-    q_axes.AXIS_X += (200 + ((uint64_t)rand()*7*cnt)/RAND_MAX);
-    q_axes.AXIS_Y -= (150 + ((uint64_t)rand()*3*cnt)/RAND_MAX);
-    q_axes.AXIS_Z += (10  + ((uint64_t)rand()*5*cnt)/RAND_MAX);
-  }
-}
-
-/**
- * @brief  Reset values for all motion sensor data
- *
- * @param  None
- * @retval None
- */
-static void Reset_Motion_Values(void)
-{
-  x_axes.AXIS_X = (x_axes.AXIS_X)%2000 == 0 ? -x_axes.AXIS_X : 10;
-  x_axes.AXIS_Y = (x_axes.AXIS_Y)%2000 == 0 ? -x_axes.AXIS_Y : -10;
-  x_axes.AXIS_Z = (x_axes.AXIS_Z)%2000 == 0 ? -x_axes.AXIS_Z : 10;
-  g_axes.AXIS_X = (g_axes.AXIS_X)%2000 == 0 ? -g_axes.AXIS_X : 100;
-  g_axes.AXIS_Y = (g_axes.AXIS_Y)%2000 == 0 ? -g_axes.AXIS_Y : -100;
-  g_axes.AXIS_Z = (g_axes.AXIS_Z)%2000 == 0 ? -g_axes.AXIS_Z : 100;
-  m_axes.AXIS_X = (g_axes.AXIS_X)%2000 == 0 ? -m_axes.AXIS_X : 3;
-  m_axes.AXIS_Y = (g_axes.AXIS_Y)%2000 == 0 ? -m_axes.AXIS_Y : -3;
-  m_axes.AXIS_Z = (g_axes.AXIS_Z)%2000 == 0 ? -m_axes.AXIS_Z : 3;
-  q_axes.AXIS_X = -q_axes.AXIS_X;
-  q_axes.AXIS_Y = -q_axes.AXIS_Y;
-  q_axes.AXIS_Z = -q_axes.AXIS_Z;
 }
 
 /**

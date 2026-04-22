@@ -4,7 +4,7 @@
 #include "../ble/BleController.h"
 #include "../serial/SerialController.h"
 #include <QDateTime>
-#include <QVector3D>
+
 #include <QComboBox>
 #include <QRadioButton>
 #include <QButtonGroup>
@@ -34,14 +34,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_bleController, &BleController::disconnected, this, &MainWindow::onDisconnected);
     connect(m_bleController, &BleController::errorOccurred, this, &MainWindow::onError);
     connect(m_bleController, &BleController::environmentalUpdated, this, &MainWindow::onEnvironmentalUpdated);
-    connect(m_bleController, &BleController::accGyroMagUpdated, this, &MainWindow::onAccGyroMagUpdated);
 
     // Serial Signals
     connect(m_serialController, &SerialController::connected, this, &MainWindow::onConnected);
     connect(m_serialController, &SerialController::disconnected, this, &MainWindow::onDisconnected);
     connect(m_serialController, &SerialController::errorOccurred, this, &MainWindow::onError);
     connect(m_serialController, &SerialController::environmentalUpdated, this, &MainWindow::onEnvironmentalUpdated);
-    connect(m_serialController, &SerialController::accGyroMagUpdated, this, &MainWindow::onAccGyroMagUpdated);
 
     setupCharts();
 
@@ -248,13 +246,6 @@ void MainWindow::onEnvironmentalUpdated(double tempC, double pressHpa, double hu
     if (tempC < m_axisY->min() || tempC > m_axisY->max()) {
         m_axisY->setRange(qMin(m_axisY->min(), tempC - 1), qMax(m_axisY->max(), tempC + 1));
     }
-}
-
-void MainWindow::onAccGyroMagUpdated(const QVector3D &acc, const QVector3D &gyro, const QVector3D &mag)
-{
-    ui->accLabel->setText(QString("Acc: X: %1 Y: %2 Z: %3").arg(acc.x()).arg(acc.y()).arg(acc.z()));
-    ui->gyroLabel->setText(QString("Gyro: X: %1 Y: %2 Z: %3").arg(gyro.x()).arg(gyro.y()).arg(gyro.z()));
-    ui->magLabel->setText(QString("Mag: X: %1 Y: %2 Z: %3").arg(mag.x()).arg(mag.y()).arg(mag.z()));
 }
 
 void MainWindow::log(const QString &message)

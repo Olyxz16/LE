@@ -92,36 +92,6 @@
         </layout>
        </widget>
       </item>
-      <item>
-       <widget class="QGroupBox" name="motionGroupBox">
-        <property name="title">
-         <string>Motion (IMU)</string>
-        </property>
-        <layout class="QVBoxLayout" name="motionLayout">
-         <item>
-          <widget class="QLabel" name="accLabel">
-           <property name="text">
-            <string>Acc: X: -- Y: -- Z: --</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="gyroLabel">
-           <property name="text">
-            <string>Gyro: X: -- Y: -- Z: --</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="magLabel">
-           <property name="text">
-            <string>Mag: X: -- Y: -- Z: --</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>

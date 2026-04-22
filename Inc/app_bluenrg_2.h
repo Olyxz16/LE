@@ -51,6 +51,7 @@
 /* Exported Functions Prototypes ---------------------------------------------*/
 void MX_BlueNRG_2_Init(void);
 void MX_BlueNRG_2_Process(void);
+void Set_Environmental_Values(float *data_t, float *data_p, float *data_h);
 
 /* USER CODE BEGIN EFP */
 

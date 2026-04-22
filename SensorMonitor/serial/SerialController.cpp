@@ -133,10 +133,5 @@ void SerialController::processFrame(uint8_t type, const QByteArray &payload)
             EnvironmentalSample sample = SensorPayloadParser::parseEnvironmental(payload);
             emit environmentalUpdated(sample.tempC, sample.pressHpa, sample.humPct);
         }
-    } else if (type == 2) { // Motion
-        if (payload.size() >= 20) {
-            MotionSample sample = SensorPayloadParser::parseMotion(payload);
-            emit accGyroMagUpdated(sample.acc, sample.gyro, sample.mag);
-        }
     }
 }

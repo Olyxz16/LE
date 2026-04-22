@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QSerialPort>
 #include <QSerialPortInfo>
-#include <QVector3D>
 #include <QByteArray>
 
 class SerialController : public QObject
@@ -23,7 +22,6 @@ signals:
     void connected();
     void disconnected();
     void environmentalUpdated(double tempC, double pressHpa, double humPct);
-    void accGyroMagUpdated(const QVector3D &acc, const QVector3D &gyro, const QVector3D &mag);
     void errorOccurred(const QString &message);
 
 private slots:

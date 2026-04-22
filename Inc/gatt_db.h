@@ -21,43 +21,16 @@
 #include "hci.h"
 
 /* Exported defines ----------------------------------------------------------*/
-#define X_OFFSET 200
-#define Y_OFFSET 50
-#define Z_OFFSET 1000
 
 /**
  * @brief Number of application services
  */
-#define NUMBER_OF_APPLICATION_SERVICES (2)
-
-/**
- * @brief Define How Many quaterions you want to trasmit (from 1 to 3)
- *        In this sample application use only 1
- */
-#define SEND_N_QUATERNIONS 1
-
-/* Exported typedef ----------------------------------------------------------*/
-/**
- * @brief Structure containing acceleration value of each axis.
- */
-typedef struct {
-  int32_t AXIS_X;
-  int32_t AXIS_Y;
-  int32_t AXIS_Z;
-} AxesRaw_t;
-
-enum {
-  ACCELERATION_SERVICE_INDEX = 0,
-  ENVIRONMENTAL_SERVICE_INDEX = 1
-};
+#define NUMBER_OF_APPLICATION_SERVICES (1)
 
 /* Exported function prototypes ----------------------------------------------*/
 tBleStatus Add_HWServW2ST_Service(void);
-tBleStatus Add_SWServW2ST_Service(void);
 void Read_Request_CB(uint16_t handle);
 tBleStatus Environmental_Update(int32_t press, int16_t temp,uint16_t hum);
-tBleStatus Acc_Update(AxesRaw_t *x_axes, AxesRaw_t *g_axes, AxesRaw_t *m_axes);
-tBleStatus Quat_Update(AxesRaw_t *q_axes);
 
 #endif /* GATT_DB_H */
 
